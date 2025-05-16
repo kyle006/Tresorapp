@@ -6,7 +6,7 @@ import ch.bbw.pr.tresorbackend.model.RegisterUser;
 import ch.bbw.pr.tresorbackend.model.User;
 import ch.bbw.pr.tresorbackend.service.PasswordEncryptionService;
 import ch.bbw.pr.tresorbackend.service.UserService;
-
+import ch.bbw.pr.tresorbackend.util.EncryptUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -80,14 +80,18 @@ public class UserController {
       //todo ergänzen
       System.out.println("UserController.createUser, password validation passed");
 
+      // Generate Salt
+      String salt = EncryptUtil.generateSalt(16);
+
       //transform registerUser to user
       User user = new User(
-            null,
-            registerUser.getFirstName(),
-            registerUser.getLastName(),
-            registerUser.getEmail(),
-            passwordService.hashPassword(registerUser.getPassword())
-            );
+              null,
+              registerUser.getFirstName(),
+              registerUser.getLastName(),
+              registerUser.getEmail(),
+              passwordService.hashPassword(registerUser.getPassword()),
+              salt
+      );
 
       User savedUser = userService.createUser(user);
       System.out.println("UserController.createUser, user saved in db");
@@ -104,7 +108,11 @@ public class UserController {
    @GetMapping("{id}")
    public ResponseEntity<User> getUserById(@PathVariable("id") Long userId) {
       User user = userService.getUserById(userId);
-      return new ResponseEntity<>(user, HttpStatus.OK);
+      if (user != null) {
+         return new ResponseEntity<>(user, HttpStatus.OK);
+      } else {
+         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      }
    }
 
    // Build Get All Users REST API
@@ -122,9 +130,12 @@ public class UserController {
    @PutMapping("{id}")
    public ResponseEntity<User> updateUser(@PathVariable("id") Long userId,
                                           @RequestBody User user) {
-      user.setId(userId);
       User updatedUser = userService.updateUser(user);
-      return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+      if (updatedUser != null) {
+         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+      } else {
+         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+      }
    }
 
    // Build Delete User REST API
@@ -144,8 +155,8 @@ public class UserController {
       //input validation
       if (bindingResult.hasErrors()) {
          List<String> errors = bindingResult.getFieldErrors().stream()
-               .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-               .collect(Collectors.toList());
+                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
+                 .collect(Collectors.toList());
          System.out.println("UserController.createUser " + errors);
 
          JsonArray arr = new JsonArray();

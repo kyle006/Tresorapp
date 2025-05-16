@@ -1,30 +1,27 @@
 package ch.bbw.pr.tresorbackend.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * User
  * @author Peter Rutschmann
  */
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
+@Data
+@NoArgsConstructor
 @Table(name = "user")
 public class User {
+
    @Id
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private Long id;
 
-   @Column(nullable = false, name="first_name")
+   @Column(nullable = false)
    private String firstName;
 
-   @Column(nullable = false, name="last_name")
+   @Column(nullable = false)
    private String lastName;
 
    @Column(nullable = false, unique = true)
@@ -32,4 +29,16 @@ public class User {
 
    @Column(nullable = false)
    private String password;
+
+   @Column(nullable = false)
+   private String salt;
+
+   public User(Long id, String firstName, String lastName, String email, String password, String salt) {
+      this.id = id;
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.email = email;
+      this.password = password;
+      this.salt = salt;
+   }
 }

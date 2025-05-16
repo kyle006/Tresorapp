@@ -56,12 +56,16 @@ public class SecretController {
       System.out.println("SecretController.createSecret, input validation passed");
 
       User user = userService.findByEmail(newSecret.getEmail());
+      String salt = EncryptUtil.generateSalt(16);
+      byte[] iv = EncryptUtil.generateIv().getIV();
 
       //transfer secret and encrypt content
       Secret secret = new Secret(
-            null,
-            user.getId(),
-            new EncryptUtil(newSecret.getEncryptPassword()).encrypt(newSecret.getContent().toString())
+              null,
+              user.getId(),
+              new EncryptUtil(newSecret.getEncryptPassword(), salt, iv).encrypt(newSecret.getContent().toString()),
+              salt,
+              iv
       );
       //save secret in db
       secretService.createSecret(secret);
@@ -87,7 +91,7 @@ public class SecretController {
       //Decrypt content
       for(Secret secret: secrets) {
          try {
-            secret.setContent(new EncryptUtil(credentials.getEncryptPassword()).decrypt(secret.getContent()));
+            secret.setContent(new EncryptUtil(credentials.getEncryptPassword(), secret.getSalt(), secret.getIv()).decrypt(secret.getContent()));
          } catch (EncryptionOperationNotPossibleException e) {
             System.out.println("SecretController.getSecretsByUserId " + e + " " + secret);
             secret.setContent("not encryptable. Wrong password?");
@@ -114,7 +118,7 @@ public class SecretController {
       //Decrypt content
       for(Secret secret: secrets) {
          try {
-            secret.setContent(new EncryptUtil(credentials.getEncryptPassword()).decrypt(secret.getContent()));
+            secret.setContent(new EncryptUtil(credentials.getEncryptPassword(), secret.getSalt(), secret.getIv()).decrypt(secret.getContent()));
          } catch (EncryptionOperationNotPossibleException e) {
             System.out.println("SecretController.getSecretsByEmail " + e + " " + secret);
             secret.setContent("not encryptable. Wrong password?");
@@ -160,8 +164,8 @@ public class SecretController {
       }
 
       //get Secret with id
-      Secret dbSecrete = secretService.getSecretById(secretId);
-      if(dbSecrete == null){
+      Secret dbSecret = secretService.getSecretById(secretId);
+      if(dbSecret == null){
          System.out.println("SecretController.updateSecret, secret not found in db");
          JsonObject obj = new JsonObject();
          obj.addProperty("answer", "Secret not found in db");
@@ -172,7 +176,7 @@ public class SecretController {
       User user = userService.findByEmail(newSecret.getEmail());
 
       //check if Secret in db has not same userid
-      if(dbSecrete.getUserId() != user.getId()){
+      if(dbSecret.getUserId() != user.getId()){
          System.out.println("SecretController.updateSecret, not same user id");
          JsonObject obj = new JsonObject();
          obj.addProperty("answer", "Secret has not same user id");
@@ -182,7 +186,7 @@ public class SecretController {
       }
       //check if Secret can be decrypted with password
       try {
-         new EncryptUtil(newSecret.getEncryptPassword()).decrypt(dbSecrete.getContent());
+         new EncryptUtil(newSecret.getEncryptPassword(), dbSecret.getSalt(), dbSecret.getIv()).decrypt(dbSecret.getContent());
       } catch (EncryptionOperationNotPossibleException e) {
          System.out.println("SecretController.updateSecret, invalid password");
          JsonObject obj = new JsonObject();
@@ -191,14 +195,19 @@ public class SecretController {
          System.out.println("SecretController.updateSecret failed:" + json);
          return ResponseEntity.badRequest().body(json);
       }
-      //modify Secret in db.
+      //modify Secret in database
+      String salt = EncryptUtil.generateSalt(16);
+      byte[] iv = EncryptUtil.generateIv().getIV();
+
       Secret secret = new Secret(
-            secretId,
-            user.getId(),
-            new EncryptUtil(newSecret.getEncryptPassword()).encrypt(newSecret.getContent().toString())
+              secretId,
+              user.getId(),
+              new EncryptUtil(newSecret.getEncryptPassword(), salt, iv).encrypt(newSecret.getContent().toString()),
+              salt,
+              iv
       );
       Secret updatedSecret = secretService.updateSecret(secret);
-      //save secret in db
+      //save secret in database
       secretService.createSecret(secret);
       System.out.println("SecretController.updateSecret, secret updated in db");
       JsonObject obj = new JsonObject();
