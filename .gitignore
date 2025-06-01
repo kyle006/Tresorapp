@@ -58,3 +58,6 @@ coverage/
 
 # Editor Settings
 *.swp
+
+# Application specific
+tresorbackend_rupe-master/src/main/resources/application.properties
