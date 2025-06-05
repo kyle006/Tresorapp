@@ -87,49 +87,119 @@ function RegisterUser({ loginValues, setLoginValues }) {
     };
 
     return (
-        <div>
-            <h2>Register user</h2>
-            <form onSubmit={handleSubmit}>
-                <section>
-                    <aside>
-                        <div>
-                            <label>Firstname:</label>
+        <div style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'radial-gradient(circle at 50% 30%, #f0f4f9 60%, #b9c6e3 100%)'
+        }}>
+            <div style={{
+                background: '#fff',
+                borderRadius: '2rem',
+                boxShadow: '0 10px 32px 0 rgba(60, 72, 100, 0.18)',
+                padding: '2.5rem',
+                width: '100%',
+                maxWidth: '750px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1.5rem'
+            }}>
+                <h2 style={{
+                    fontWeight: 700,
+                    color: '#2d3748',
+                    margin: '0 0 0.5rem 0',
+                    fontSize: '1.7rem',
+                    letterSpacing: '.5px',
+                    textAlign: 'center'
+                }}>Register User</h2>
+                <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+
+                    <div style={{ display: 'flex', gap: '1.2rem', width: '100%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1 }}>
+                            <label htmlFor="firstName" style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>First Name:</label>
                             <input
+                                id="firstName"
                                 type="text"
                                 value={credentials.firstName}
                                 onChange={(e) =>
                                     setCredentials(prevValues => ({ ...prevValues, firstName: e.target.value }))}
                                 required
                                 placeholder="Please enter your firstname *"
+                                style={{
+                                    padding: '.7rem',
+                                    borderRadius: '.7rem',
+                                    border: '1.5px solid #cbd5e1',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    background: '#f7fafc',
+                                    transition: 'border-color 0.2s',
+                                    width: '100%',
+                                    boxSizing: 'border-box'
+                                }}
+                                onFocus={e => e.target.style.borderColor = '#667eea'}
+                                onBlur={e => e.target.style.borderColor = '#cbd5e1'}
                             />
                         </div>
-                        <div>
-                            <label>Lastname:</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1 }}>
+                            <label htmlFor="lastName" style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>Last Name:</label>
                             <input
+                                id="lastName"
                                 type="text"
                                 value={credentials.lastName}
                                 onChange={(e) =>
                                     setCredentials(prevValues => ({ ...prevValues, lastName: e.target.value }))}
                                 required
                                 placeholder="Please enter your lastname *"
+                                style={{
+                                    padding: '.7rem',
+                                    borderRadius: '.7rem',
+                                    border: '1.5px solid #cbd5e1',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    background: '#f7fafc',
+                                    transition: 'border-color 0.2s',
+                                    width: '100%',
+                                    boxSizing: 'border-box'
+                                }}
+                                onFocus={e => e.target.style.borderColor = '#667eea'}
+                                onBlur={e => e.target.style.borderColor = '#cbd5e1'}
                             />
                         </div>
-                        <div>
-                            <label>Email:</label>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
+                        <label htmlFor="email" style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>Email:</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={credentials.email}
+                            onChange={(e) =>
+                                setCredentials(prevValues => ({ ...prevValues, email: e.target.value }))}
+                            required
+                            placeholder="Please enter your email *"
+                            style={{
+                                padding: '.7rem',
+                                borderRadius: '.7rem',
+                                border: '1.5px solid #cbd5e1',
+                                fontSize: '1rem',
+                                outline: 'none',
+                                background: '#f7fafc',
+                                transition: 'border-color 0.2s',
+                                width: '100%',
+                                boxSizing: 'border-box'
+                            }}
+                            onFocus={e => e.target.style.borderColor = '#667eea'}
+                            onBlur={e => e.target.style.borderColor = '#cbd5e1'}
+                        />
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1.2rem', width: '100%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1 }}>
+                            <label htmlFor="password" style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>Password:</label>
                             <input
-                                type="text"
-                                value={credentials.email}
-                                onChange={(e) =>
-                                    setCredentials(prevValues => ({ ...prevValues, email: e.target.value }))}
-                                required
-                                placeholder="Please enter your email"
-                            />
-                        </div>
-                    </aside>
-                    <aside>
-                        <div>
-                            <label>Password:</label>
-                            <input
+                                id="password"
                                 type="password"
                                 value={credentials.password}
                                 onChange={(e) => {
@@ -137,48 +207,115 @@ function RegisterUser({ loginValues, setLoginValues }) {
                                     setPasswordErrors(validatePassword(e.target.value));
                                 }}
                                 required
-                                placeholder="Please enter your pwd *"
+                                placeholder="Please enter your password *"
+                                style={{
+                                    padding: '.7rem',
+                                    borderRadius: '.7rem',
+                                    border: '1.5px solid #cbd5e1',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    background: '#f7fafc',
+                                    transition: 'border-color 0.2s',
+                                    width: '100%',
+                                    boxSizing: 'border-box'
+                                }}
+                                onFocus={e => e.target.style.borderColor = '#667eea'}
+                                onBlur={e => e.target.style.borderColor = '#cbd5e1'}
                             />
                         </div>
-                        <div>
-                            <label>Password confirmation:</label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', flex: 1 }}>
+                            <label htmlFor="passwordConfirmation" style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>Password Confirmation:</label>
                             <input
+                                id="passwordConfirmation"
                                 type="password"
                                 value={credentials.passwordConfirmation}
                                 onChange={(e) =>
                                     setCredentials(prevValues => ({ ...prevValues, passwordConfirmation: e.target.value }))}
                                 required
-                                placeholder="Please confirm your pwd *"
+                                placeholder="Please confirm your password *"
+                                style={{
+                                    padding: '.7rem',
+                                    borderRadius: '.7rem',
+                                    border: '1.5px solid #cbd5e1',
+                                    fontSize: '1rem',
+                                    outline: 'none',
+                                    background: '#f7fafc',
+                                    transition: 'border-color 0.2s',
+                                    width: '100%',
+                                    boxSizing: 'border-box'
+                                }}
+                                onFocus={e => e.target.style.borderColor = '#667eea'}
+                                onBlur={e => e.target.style.borderColor = '#cbd5e1'}
                             />
                         </div>
-                    </aside>
-                </section>
-                <ReCAPTCHA
-                    ref={recaptchaRef}
-                    sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
-                    onChange={(token) => {
-                        setCaptchaToken(token);
-                    }}
-                    onExpired={() => {
-                        setCaptchaToken(null);
-                    }}
-                    onError={() => {
-                        setCaptchaToken(null);
-                    }}
-                />
-                <button type="submit">Register</button>
-                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-                {passwordErrors.length > 0 && (
-                    <div style={{ color: 'red' }}>
-                        <p>Password errors:</p>
-                        <ul>
-                            {passwordErrors.map((error, index) => (
-                                <li key={index}>{error}</li>
-                            ))}
-                        </ul>
                     </div>
-                )}
-            </form>
+
+                    {/* Error messages moved before ReCAPTCHA */}
+                    {errorMessage &&
+                        <p style={{
+                            color: '#e53e3e',
+                            textAlign: 'center',
+                            marginTop: '1rem',
+                            background: '#fed7d7',
+                            padding: '.7rem',
+                            borderRadius: '.7rem',
+                            border: '1px solid #f56565'
+                        }}>{errorMessage}</p>}
+                    {passwordErrors.length > 0 && (
+                        <div style={{
+                            color: '#e53e3e',
+                            marginTop: '1rem',
+                            border: '1px solid #f56565',
+                            background: '#fed7d7',
+                            padding: '1rem',
+                            borderRadius: '.7rem'
+                        }}>
+                            <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold' }}>Password errors:</p>
+                            <ul style={{ margin: '0', paddingLeft: '20px' }}>
+                                {passwordErrors.map((error, index) => (
+                                    <li key={index} style={{ marginBottom: '0.25rem' }}>{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'center', margin: '0.5rem 0' }}>
+                        <ReCAPTCHA
+                            ref={recaptchaRef}
+                            sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+                            onChange={(token) => {
+                                setCaptchaToken(token);
+                            }}
+                            onExpired={() => {
+                                setCaptchaToken(null);
+                            }}
+                            onError={() => {
+                                setCaptchaToken(null);
+                            }}
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        style={{
+                            marginTop: '0.5rem',
+                            background: 'linear-gradient(90deg, #667eea 0%, #5a67d8 100%)',
+                            color: '#fff',
+                            padding: '.9rem',
+                            border: 'none',
+                            borderRadius: '.7rem',
+                            fontWeight: 700,
+                            fontSize: '1.1rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(90,103,216,0.10)',
+                            transition: 'background 0.2s'
+                        }}
+                        onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg, #5a67d8 0%, #667eea 100%)'}
+                        onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg, #667eea 0%, #5a67d8 100%)'}
+                    >
+                        Register
+                    </button>
+                </form>
+            </div>
         </div>
     );
 }
