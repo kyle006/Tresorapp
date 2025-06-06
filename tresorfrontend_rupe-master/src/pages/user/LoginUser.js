@@ -1,12 +1,19 @@
 import { useNavigate } from 'react-router-dom';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 /**
  * LoginUser
  * @author Peter Rutschmann
  */
-function LoginUser({loginValues, setLoginValues}) {
+function LoginUser({ loginValues, setLoginValues }) {
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setLoginValues({
+            email: "",
+            password: ""
+        })
+    }, [setLoginValues]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,7 +52,7 @@ function LoginUser({loginValues, setLoginValues}) {
                     marginBottom: '0.5rem'
                 }}>
                     <svg width="32" height="32" fill="#fff" viewBox="0 0 24 24">
-                        <path d="M12 12c2.7 0 8 1.34 8 4v2H4v-2c0-2.66 5.3-4 8-4zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+                        <path d="M12 12c2.7 0 8 1.34 8 4v2H4v-2c0-2.66 5.3-4 8-4zm0-2a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />
                     </svg>
                 </div>
                 <h2 style={{
@@ -62,7 +69,7 @@ function LoginUser({loginValues, setLoginValues}) {
                             type="text"
                             value={loginValues.email}
                             onChange={(e) =>
-                                setLoginValues(prevValues => ({...prevValues, email: e.target.value}))}
+                                setLoginValues(prevValues => ({ ...prevValues, email: e.target.value }))}
                             required
                             placeholder="you@example.com"
                             style={{
@@ -84,7 +91,7 @@ function LoginUser({loginValues, setLoginValues}) {
                             type="password"
                             value={loginValues.password}
                             onChange={(e) =>
-                                setLoginValues(prevValues => ({...prevValues, password: e.target.value}))}
+                                setLoginValues(prevValues => ({ ...prevValues, password: e.target.value }))}
                             required
                             placeholder="Enter your password"
                             style={{
