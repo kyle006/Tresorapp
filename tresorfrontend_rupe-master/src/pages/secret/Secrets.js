@@ -36,7 +36,7 @@ const Secrets = ({loginValues}) => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)'
+            background: 'radial-gradient(circle at 50% 30%, #f0f4f9 60%, #b9c6e3 100%)'
         }}>
             <div style={{
                 background: '#fff',
