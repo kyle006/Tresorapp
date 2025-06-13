@@ -11,7 +11,7 @@ const Layout = ({loginValues}) => {
                 background: '#f7fafc',
                 borderBottom: '1.5px solid #e2e8f0',
                 padding: '1.2rem 2rem',
-                marginBottom: '1.5rem'
+                marginBottom: '0px'
             }}>
                 <h1 style={{
                     color: '#2d3748',
