@@ -24,6 +24,7 @@ function RegisterUser({ loginValues, setLoginValues }) {
     const recaptchaRef = useRef();
     const [captchaToken, setCaptchaToken] = useState(null);
 
+    // Password validation function
     const validatePassword = (password) => {
         const errors = [];
         if (password.length < 8) {
@@ -47,6 +48,7 @@ function RegisterUser({ loginValues, setLoginValues }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setErrorMessage('');
+        //added error message
         setPasswordErrors([]);
 
         const currentToken = captchaToken;

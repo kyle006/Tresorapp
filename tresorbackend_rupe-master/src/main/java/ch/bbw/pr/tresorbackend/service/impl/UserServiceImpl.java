@@ -59,7 +59,17 @@ public class UserServiceImpl implements UserService {
    public void deleteUser(Long userId) {
       userRepository.deleteById(userId);
    }
-
+/*
+    * Validates the password according to specified rules:
+    * - At least 8 characters long
+    * - Contains at least one uppercase letter
+    * - Contains at least one lowercase letter
+    * - Contains at least one digit
+    * - Contains at least one special character
+    *
+    * @param password the password to validate
+    * @return a list of error messages if validation fails, empty list if validation passes
+ */
    @Override
    public List<String> validatePassword(String password) {
       List<String> errors = new ArrayList<>();
