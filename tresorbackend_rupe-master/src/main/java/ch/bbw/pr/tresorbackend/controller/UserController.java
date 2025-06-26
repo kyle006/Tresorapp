@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -111,7 +112,8 @@ public class UserController {
               registerUser.getLastName(),
               registerUser.getEmail(),
               passwordService.hashPassword(registerUser.getPassword()),
-              salt
+              salt,
+              "USER"
       );
 
       User savedUser = userService.createUser(user);
@@ -127,6 +129,7 @@ public class UserController {
    // http://localhost:8080/api/users/1
    @CrossOrigin(origins = "${CROSS_ORIGIN}")
    @GetMapping("{id}")
+   @PreAuthorize("hasRole('ADMIN') or @userSecurity.hasUserId(authentication, #userId)")
    public ResponseEntity<User> getUserById(@PathVariable("id") Long userId) {
       User user = userService.getUserById(userId);
       if (user != null) {
@@ -140,6 +143,7 @@ public class UserController {
    // http://localhost:8080/api/users
    @CrossOrigin(origins = "${CROSS_ORIGIN}")
    @GetMapping
+   @PreAuthorize("hasRole('ADMIN')")
    public ResponseEntity<List<User>> getAllUsers() {
       List<User> users = userService.getAllUsers();
       return new ResponseEntity<>(users, HttpStatus.OK);
@@ -149,6 +153,7 @@ public class UserController {
    // http://localhost:8080/api/users/1
    @CrossOrigin(origins = "${CROSS_ORIGIN}")
    @PutMapping("{id}")
+   @PreAuthorize("hasRole('ADMIN') or @userSecurity.hasUserId(authentication, #userId)")
    public ResponseEntity<User> updateUser(@PathVariable("id") Long userId,
                                           @RequestBody User user) {
       User updatedUser = userService.updateUser(user);
@@ -162,6 +167,7 @@ public class UserController {
    // Build Delete User REST API
    @CrossOrigin(origins = "${CROSS_ORIGIN}")
    @DeleteMapping("{id}")
+   @PreAuthorize("hasRole('ADMIN')")
    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId) {
       userService.deleteUser(userId);
       return new ResponseEntity<>("User successfully deleted!", HttpStatus.OK);

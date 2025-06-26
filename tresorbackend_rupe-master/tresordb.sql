@@ -19,6 +19,7 @@ CREATE TABLE user (
     email varchar(30) NOT NULL,
     password longtext NOT NULL,
     salt varchar(60) NOT NULL,
+    role varchar(20) NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -26,10 +27,10 @@ CREATE TABLE user (
 -- table user content
 --
 
--- INSERT INTO `user` (`id`, `first_name`, `last_name`, `email`, `password`) VALUES
--- (1, 'Hans', 'Muster', 'hans.muster@bbw.ch', 'abcd'),
--- (2, 'Paula', 'Kuster', 'paula.kuster@bbw.ch', 'efgh'),
--- (3, 'Andrea', 'Oester', 'andrea.oester@bbw.ch', 'ijkl');
+-- INSERT INTO `user` (`id`, `first_name`, `last_name`, `email`, `password`, `role`) VALUES
+-- (1, 'Hans', 'Muster', 'hans.muster@bbw.ch', 'abcd', 'USER'),
+-- (2, 'Paula', 'Kuster', 'paula.kuster@bbw.ch', 'efgh', 'USER'),
+-- (3, 'Andrea', 'Oester', 'andrea.oester@bbw.ch', 'ijkl', 'ADMIN');
 
 --
 -- table secret

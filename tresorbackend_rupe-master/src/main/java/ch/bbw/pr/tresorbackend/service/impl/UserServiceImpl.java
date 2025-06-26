@@ -5,7 +5,13 @@ import ch.bbw.pr.tresorbackend.repository.UserRepository;
 import ch.bbw.pr.tresorbackend.service.UserService;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.security.SecureRandom;
@@ -19,7 +25,7 @@ import java.util.regex.Pattern;
  */
 @Service
 @AllArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
    private UserRepository userRepository;
 
@@ -31,13 +37,13 @@ public class UserServiceImpl implements UserService {
    @Override
    public User getUserById(Long userId) {
       Optional<User> optionalUser = userRepository.findById(userId);
-      return optionalUser.get();
+      return optionalUser.orElse(null);
    }
 
    @Override
    public User findByEmail(String email) {
       Optional<User> optionalUser = userRepository.findByEmail(email);
-      return optionalUser.get();
+      return optionalUser.orElse(null);
    }
 
    @Override
@@ -47,7 +53,10 @@ public class UserServiceImpl implements UserService {
 
    @Override
    public User updateUser(User user) {
-      User existingUser = userRepository.findById(user.getId()).get();
+      User existingUser = userRepository.findById(user.getId()).orElse(null);
+      if(existingUser == null) {
+         return null;
+      }
       existingUser.setFirstName(user.getFirstName());
       existingUser.setLastName(user.getLastName());
       existingUser.setEmail(user.getEmail());
@@ -59,17 +68,17 @@ public class UserServiceImpl implements UserService {
    public void deleteUser(Long userId) {
       userRepository.deleteById(userId);
    }
-/*
-    * Validates the password according to specified rules:
-    * - At least 8 characters long
-    * - Contains at least one uppercase letter
-    * - Contains at least one lowercase letter
-    * - Contains at least one digit
-    * - Contains at least one special character
-    *
-    * @param password the password to validate
-    * @return a list of error messages if validation fails, empty list if validation passes
- */
+
+   @Override
+   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+      User user = userRepository.findByEmail(email)
+              .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+      GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole());
+
+      return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Collections.singleton(authority));
+   }
+
    @Override
    public List<String> validatePassword(String password) {
       List<String> errors = new ArrayList<>();
