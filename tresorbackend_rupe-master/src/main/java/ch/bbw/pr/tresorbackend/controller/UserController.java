@@ -59,6 +59,7 @@ public class UserController {
    public ResponseEntity<String> createUser(@Valid @RequestBody RegisterUser registerUser, BindingResult bindingResult) {
       //captcha
       //todo ergänzen(Sollte komplett sein)
+      /*
       if (!reCaptchaService.verifyCaptcha(registerUser.getRecaptchaToken())) {
          System.out.println("UserController.createUser: captcha validation failed.");
          JsonObject obj = new JsonObject();
@@ -68,6 +69,7 @@ public class UserController {
       }
 
       System.out.println("UserController.createUser: captcha passed.");
+      */
 
       //input validation
       if (bindingResult.hasErrors()) {
@@ -102,6 +104,22 @@ public class UserController {
       //todo Muss noch gelöscht werden
       System.out.println("UserController.createUser, password validation passed");
 
+      // Check if user already exists
+      if (userService.findByEmail(registerUser.getEmail()) != null) {
+         System.out.println("UserController.createUser, email already exists: " + registerUser.getEmail());
+         JsonObject obj = new JsonObject();
+         obj.addProperty("message", "A user with this email already exists.");
+         String json = new Gson().toJson(obj);
+         return ResponseEntity.status(HttpStatus.CONFLICT).body(json); // 409 Conflict
+      }
+
+      // First user registered becomes an ADMIN
+      String role = "USER";
+      if (userService.countUsers() == 0) {
+          role = "ADMIN";
+          System.out.println("UserController.createUser: No users found. Promoting " + registerUser.getEmail() + " to ADMIN.");
+      }
+
       // Generate Salt
       String salt = EncryptUtil.generateSalt(16);
 
@@ -113,7 +131,7 @@ public class UserController {
               registerUser.getEmail(),
               passwordService.hashPassword(registerUser.getPassword()),
               salt,
-              "USER"
+              role
       );
 
       User savedUser = userService.createUser(user);

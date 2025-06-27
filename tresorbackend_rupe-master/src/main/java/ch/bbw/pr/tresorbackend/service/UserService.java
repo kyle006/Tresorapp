@@ -21,4 +21,6 @@ public interface UserService {
    void deleteUser(Long userId);
 
    List<String> validatePassword(String password);
+
+   long countUsers();
 }

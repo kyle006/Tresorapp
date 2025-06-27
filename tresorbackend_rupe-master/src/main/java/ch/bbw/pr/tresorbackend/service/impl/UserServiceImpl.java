@@ -74,9 +74,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
       User user = userRepository.findByEmail(email)
               .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-      GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole());
+      // Aufgabe: Rollenbasierte Autorisierung - Fügt das "ROLE_"-Präfix für Spring Security hinzu.
+      GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().toUpperCase());
 
       return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), Collections.singleton(authority));
+   }
+
+   @Override
+   public long countUsers() {
+      return userRepository.count();
    }
 
    @Override

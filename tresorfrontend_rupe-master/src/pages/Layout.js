@@ -1,10 +1,42 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import React from "react";
 
 /**
  * Layout
  * @author Peter Rutschmann
  */
-const Layout = ({loginValues}) => {
+const Layout = ({ loginValues, handleLogout }) => {
+    const navigate = useNavigate();
+    let userRole = null;
+    const token = localStorage.getItem('token');
+
+    // Aufgabe: Rollenbasierte Anzeige im Frontend.
+    if (token) {
+        try {
+            // 1. JWT aus dem Local Storage dekodieren.
+            const decodedToken = jwtDecode(token);
+            // 2. Rollen aus dem Token auslesen.
+            const rolesString = decodedToken.roles || '';
+            const roles = rolesString.split(',');
+
+            // 3. User-Rolle für die Anzeige setzen.
+            if (roles.includes('ROLE_ADMIN')) {
+                userRole = 'ADMIN';
+            } else if (roles.includes('ROLE_USER')) {
+                userRole = 'USER';
+            }
+        } catch (error) {
+            console.error("Failed to decode JWT:", error);
+            userRole = null;
+        }
+    }
+
+    const onLogoutClick = () => {
+        handleLogout();
+        navigate('/user/login');
+    };
+
     return (
         <>
             <nav style={{
@@ -20,7 +52,7 @@ const Layout = ({loginValues}) => {
                     letterSpacing: '.5px'
                 }}>The secret tresor application</h1>
                 <p style={{ color: '#4a5568', margin: '.3rem 0 1rem 0', fontSize: '1rem' }}>
-                    {loginValues.email === '' ? 'No user logged in' : 'User: ' + loginValues.email}
+                    {loginValues.email ? 'User: ' + loginValues.email : 'No user logged in'}
                 </p>
                 <ul style={{
                     display: 'flex',
@@ -42,25 +74,31 @@ const Layout = ({loginValues}) => {
                     <li>
                         <span style={{ color: '#5a67d8', fontWeight: 600 }}>User</span>
                         <ul style={{ marginTop: '.3rem', marginLeft: '1.2rem', listStyle: 'disc', color: '#4a5568', fontWeight: 500 }}>
-                            <li><Link to="/user/login" style={{ color: '#4a5568', textDecoration: 'none' }}>Login</Link></li>
-                            <li><Link to="/user/register" style={{ color: '#4a5568', textDecoration: 'none' }}>Register</Link></li>
+                            {userRole ? (
+                                <li><button onClick={onLogoutClick} style={{ color: '#4a5568', textDecoration: 'none', background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}>Logout</button></li>
+                            ) : (
+                                <>
+                                    <li><Link to="/user/login" style={{ color: '#4a5568', textDecoration: 'none' }}>Login</Link></li>
+                                    <li><Link to="/user/register" style={{ color: '#4a5568', textDecoration: 'none' }}>Register</Link></li>
+                                </>
+                            )}
                         </ul>
                     </li>
-                    <li>
-                        <span style={{ color: '#5a67d8', fontWeight: 600 }}>Admin</span>
-                        <ul style={{ marginTop: '.3rem', marginLeft: '1.2rem', listStyle: 'disc', color: '#4a5568', fontWeight: 500 }}>
-                            <li><Link to="/user/users" style={{ color: '#4a5568', textDecoration: 'none' }}>All users</Link></li>
-                            <li style={{ color: '#a0aec0' }}>Add user</li>
-                            <li><Link to="/user/users/:id" style={{ color: '#4a5568', textDecoration: 'none' }}>Edit user</Link></li>
-                            <li style={{ color: '#a0aec0' }}>All secrets</li>
-                        </ul>
-                    </li>
+                    {/* 4. Admin-Bereich nur anzeigen, wenn der User die ADMIN-Rolle hat. */}
+                    {userRole === 'ADMIN' && (
+                        <li>
+                            <span style={{ color: '#5a67d8', fontWeight: 600 }}>Admin</span>
+                            <ul style={{ marginTop: '.3rem', marginLeft: '1.2rem', listStyle: 'disc', color: '#4a5568', fontWeight: 500 }}>
+                                <li><Link to="/user/users" style={{ color: '#4a5568', textDecoration: 'none' }}>All users</Link></li>
+                            </ul>
+                        </li>
+                    )}
                     <li>
                         <Link to="/" style={{ color: '#5a67d8', fontWeight: 600, textDecoration: 'none' }}>About</Link>
                     </li>
                 </ul>
             </nav>
-            <Outlet/>
+            <Outlet />
         </>
     )
 };

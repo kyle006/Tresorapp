@@ -1,25 +1,39 @@
-import { useNavigate } from 'react-router-dom';
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import { loginUser } from "../../comunication/FetchUser";
 
 /**
  * LoginUser
  * @author Peter Rutschmann
  */
-function LoginUser({ loginValues, setLoginValues }) {
+const LoginUser = ({ handleLogin }) => {
+    const [inputs, setInputs] = useState({ email: "", password: "" });
+    const [message, setMessage] = useState("Please login");
     const navigate = useNavigate();
 
-    useEffect(() => {
-        setLoginValues({
-            email: "",
-            password: ""
-        })
-    }, [setLoginValues]);
+    const handleChange = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setInputs(values => ({ ...values, [name]: value }))
+    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        console.log(loginValues);
-        navigate('/')
-    };
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        loginUser(inputs)
+            .then(data => {
+                if (data.token) {
+                    setMessage(`Login successfully`);
+                    handleLogin(inputs.email, data.token);
+                    navigate("/");
+                }
+                else {
+                    setMessage("Login failed: " + (data.message || "Unknown error"));
+                }
+            })
+            .catch(err => {
+                setMessage("Login failed: " + err.message);
+            });
+    }
 
     return (
         <div style={{
@@ -62,14 +76,15 @@ function LoginUser({ loginValues, setLoginValues }) {
                     fontSize: '1.7rem',
                     letterSpacing: '.5px'
                 }}>Sign in</h2>
+                {message && <p style={{ color: message.startsWith('Login failed') ? 'red' : 'green', margin: '0 0 1rem 0' }}>{message}</p>}
                 <form onSubmit={handleSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '.4rem' }}>
                         <label style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>Email address</label>
                         <input
                             type="text"
-                            value={loginValues.email}
-                            onChange={(e) =>
-                                setLoginValues(prevValues => ({ ...prevValues, email: e.target.value }))}
+                            name="email"
+                            value={inputs.email}
+                            onChange={handleChange}
                             required
                             placeholder="you@example.com"
                             style={{
@@ -89,9 +104,9 @@ function LoginUser({ loginValues, setLoginValues }) {
                         <label style={{ fontWeight: 500, color: '#4a5568', marginBottom: '.2rem' }}>Password</label>
                         <input
                             type="password"
-                            value={loginValues.password}
-                            onChange={(e) =>
-                                setLoginValues(prevValues => ({ ...prevValues, password: e.target.value }))}
+                            name="password"
+                            value={inputs.password}
+                            onChange={handleChange}
                             required
                             placeholder="Enter your password"
                             style={{

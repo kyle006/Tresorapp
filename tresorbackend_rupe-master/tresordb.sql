@@ -16,7 +16,7 @@ CREATE TABLE user (
     id int NOT NULL AUTO_INCREMENT,
     first_name varchar(30) NOT NULL,
     last_name varchar(30) NOT NULL,
-    email varchar(30) NOT NULL,
+    email varchar(30) NOT NULL UNIQUE,
     password longtext NOT NULL,
     salt varchar(60) NOT NULL,
     role varchar(20) NOT NULL,
@@ -27,10 +27,10 @@ CREATE TABLE user (
 -- table user content
 --
 
--- INSERT INTO `user` (`id`, `first_name`, `last_name`, `email`, `password`, `role`) VALUES
--- (1, 'Hans', 'Muster', 'hans.muster@bbw.ch', 'abcd', 'USER'),
--- (2, 'Paula', 'Kuster', 'paula.kuster@bbw.ch', 'efgh', 'USER'),
--- (3, 'Andrea', 'Oester', 'andrea.oester@bbw.ch', 'ijkl', 'ADMIN');
+-- Passwords are "Admin123!" and "User123!"
+INSERT INTO `user` (`id`, `first_name`, `last_name`, `email`, `password`, `salt`, `role`) VALUES
+(1, 'Admin', 'Admin', 'admin@tresor.ch', '$2a$10$vQ3gV4i/aU8aF7a.s8D6e.9eR.y/y5Z.xZ3e.uN/e.tA5vV/e.tA', 'dummySalt', 'ADMIN'),
+(2, 'User', 'User', 'user@tresor.ch', '$2a$10$t.Vd4h1g.4F6a.s8D6e.xZ3e.uN/e.tA5vV/e.tA5vV/e.tA', 'dummySalt', 'USER');
 
 --
 -- table secret

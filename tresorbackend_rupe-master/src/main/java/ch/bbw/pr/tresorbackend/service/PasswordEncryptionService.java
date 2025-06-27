@@ -1,6 +1,7 @@
 package ch.bbw.pr.tresorbackend.service;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -8,17 +9,16 @@ import org.springframework.stereotype.Service;
  * @author Kyle Meier
  */
 @Service
+@RequiredArgsConstructor
 public class PasswordEncryptionService {
-   private final String pepper = "staticPepperValue";
+   private final PasswordEncoder passwordEncoder;
 
    public String hashPassword(String password) {
-      // BCrypt automatically handles salting
-      String saltedPassword = password + pepper;
-      return new BCryptPasswordEncoder().encode(saltedPassword);
+      // BCrypt is handled by the PasswordEncoder bean
+      return passwordEncoder.encode(password);
    }
 
    public boolean checkPassword(String rawPassword, String encodedPassword) {
-      String saltedPassword = rawPassword + pepper;
-      return new BCryptPasswordEncoder().matches(saltedPassword, encodedPassword);
+      return passwordEncoder.matches(rawPassword, encodedPassword);
    }
 }

@@ -4,26 +4,23 @@
  */
 
 //Post secret to server
-export const postSecret = async ({loginValues, content}) => {
+export const postSecret = async (content) => {
     const protocol = process.env.REACT_APP_API_PROTOCOL; // "http"
     const host = process.env.REACT_APP_API_HOST; // "localhost"
     const port = process.env.REACT_APP_API_PORT; // "8080"
     const path = process.env.REACT_APP_API_PATH; // "/api"
     const portPart = port ? `:${port}` : ''; // port is optional
     const API_URL = `${protocol}://${host}${portPart}${path}`;
-    console.log(loginValues)
+    const token = localStorage.getItem('token');
 
     try {
         const response = await fetch(`${API_URL}/secrets`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({
-                email: loginValues.email,
-                encryptPassword: loginValues.password,
-                content: content
-            })
+            body: JSON.stringify(content)
         });
 
         if (!response.ok) {
@@ -41,24 +38,22 @@ export const postSecret = async ({loginValues, content}) => {
 };
 
 //get all secrets for a user identified by its email
-export const getSecretsforUser = async (loginValues) => {
+export const getSecretsforUser = async () => {
     const protocol = process.env.REACT_APP_API_PROTOCOL; // "http"
     const host = process.env.REACT_APP_API_HOST; // "localhost"
     const port = process.env.REACT_APP_API_PORT; // "8080"
     const path = process.env.REACT_APP_API_PATH; // "/api"
     const portPart = port ? `:${port}` : ''; // port is optional
     const API_URL = `${protocol}://${host}${portPart}${path}`;
+    const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`${API_URL}/secrets/byemail`, {
-            method: 'POST',
+        const response = await fetch(`${API_URL}/secrets`, {
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: loginValues.email,
-                encryptPassword: loginValues.password
-            })
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
         });
 
         if (!response.ok) {
