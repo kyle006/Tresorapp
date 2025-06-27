@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../../comunication/FetchUser";
 
 /**
@@ -10,6 +10,13 @@ const LoginUser = ({ handleLogin }) => {
     const [inputs, setInputs] = useState({ email: "", password: "" });
     const [message, setMessage] = useState("Please login");
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (location.state && location.state.message) {
+            setMessage(location.state.message);
+        }
+    }, [location]);
 
     const handleChange = (event) => {
         const name = event.target.name;
@@ -23,7 +30,7 @@ const LoginUser = ({ handleLogin }) => {
             .then(data => {
                 if (data.token) {
                     setMessage(`Login successfully`);
-                    handleLogin(inputs.email, data.token);
+                    handleLogin(inputs.email, data.token, inputs.password);
                     navigate("/");
                 }
                 else {

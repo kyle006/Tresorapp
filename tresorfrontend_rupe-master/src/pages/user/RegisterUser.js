@@ -7,7 +7,7 @@ import ReCAPTCHA from "react-google-recaptcha";
  * RegisterUser
  * @author Peter Rutschmann
  */
-function RegisterUser({ loginValues, setLoginValues }) {
+function RegisterUser() {
     const navigate = useNavigate();
 
     const initialState = {
@@ -75,13 +75,13 @@ function RegisterUser({ loginValues, setLoginValues }) {
         try {
             const payload = { ...credentials, captchaToken: currentToken };
             await postUser(payload);
-            setLoginValues({ userName: credentials.email, password: credentials.password });
             setCredentials(initialState);
             if (recaptchaRef.current) {
                 recaptchaRef.current.reset();
             }
             setCaptchaToken(null);
-            navigate('/');
+            // On success, redirect to login page with a success message
+            navigate('/user/login', { state: { message: "Registration successful! Please log in." } });
         } catch (error) {
             console.error('Failed to fetch to server:', error.message);
             setErrorMessage(error.message);

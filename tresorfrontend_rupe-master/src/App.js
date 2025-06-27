@@ -18,26 +18,26 @@ import RegisterUser from './pages/user/RegisterUser';
  * @author Peter Rutschmann
  */
 function App() {
-    const [loginValues, setLoginValues] = useState({ email: '', token: '' });
+    const [loginValues, setLoginValues] = useState({ email: '', token: '', password: '' });
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         const email = localStorage.getItem('email');
         if (token && email) {
-            setLoginValues({ email: email, token: token });
+            setLoginValues(prev => ({ ...prev, email: email, token: token }));
         }
     }, []);
 
-    const handleLogin = (email, token) => {
+    const handleLogin = (email, token, password) => {
         localStorage.setItem('token', token);
         localStorage.setItem('email', email);
-        setLoginValues({ email: email, token: token });
+        setLoginValues({ email: email, token: token, password: password });
     }
 
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('email');
-        setLoginValues({ email: '', token: '' });
+        setLoginValues({ email: '', token: '', password: '' });
     }
 
     return (
@@ -48,10 +48,10 @@ function App() {
                     <Route path="user/users" element={<Users />} />
                     <Route path="user/login" element={<LoginUser handleLogin={handleLogin} />} />
                     <Route path="user/register" element={<RegisterUser />} />
-                    <Route path="secret/secrets" element={<Secrets />} />
-                    <Route path="secret/newcredential" element={<NewCredential />} />
-                    <Route path="secret/newcreditcard" element={<NewCreditCard />} />
-                    <Route path="secret/newnote" element={<NewNote />} />
+                    <Route path="secret/secrets" element={<Secrets loginValues={loginValues} />} />
+                    <Route path="secret/newcredential" element={<NewCredential loginValues={loginValues} />} />
+                    <Route path="secret/newcreditcard" element={<NewCreditCard loginValues={loginValues} />} />
+                    <Route path="secret/newnote" element={<NewNote loginValues={loginValues} />} />
                     <Route path="*" element={<NoPage />} />
                 </Route>
             </Routes>

@@ -4,7 +4,7 @@
  */
 
 //Post secret to server
-export const postSecret = async (content) => {
+export const postSecret = async ({ loginValues, content }) => {
     const protocol = process.env.REACT_APP_API_PROTOCOL; // "http"
     const host = process.env.REACT_APP_API_HOST; // "localhost"
     const port = process.env.REACT_APP_API_PORT; // "8080"
@@ -20,7 +20,10 @@ export const postSecret = async (content) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify(content)
+            body: JSON.stringify({
+                content: content,
+                encryptPassword: loginValues.password
+            })
         });
 
         if (!response.ok) {
@@ -37,8 +40,8 @@ export const postSecret = async (content) => {
     }
 };
 
-//get all secrets for a user identified by its email
-export const getSecretsforUser = async () => {
+//get all secrets for a user
+export const getSecretsforUser = async (password) => {
     const protocol = process.env.REACT_APP_API_PROTOCOL; // "http"
     const host = process.env.REACT_APP_API_HOST; // "localhost"
     const port = process.env.REACT_APP_API_PORT; // "8080"
@@ -48,7 +51,8 @@ export const getSecretsforUser = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await fetch(`${API_URL}/secrets`, {
+        // The password is sent as a URL parameter for the GET request
+        const response = await fetch(`${API_URL}/secrets?password=${encodeURIComponent(password)}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -61,10 +65,10 @@ export const getSecretsforUser = async () => {
             throw new Error(errorData.message || 'Server response failed.');
         }
         const data = await response.json();
-        console.log('Secret successfully got:', data);
+        console.log('Secrets successfully retrieved:', data);
         return data;
     } catch (error) {
         console.error('Failed to get secrets:', error.message);
-        throw new Error('Failed to get secrets. ' || error.message);
+        throw new Error('Failed to get secrets. ' + error.message);
     }
 };

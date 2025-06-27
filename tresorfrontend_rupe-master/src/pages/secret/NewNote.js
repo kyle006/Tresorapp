@@ -22,7 +22,7 @@ function NewNote({ loginValues }) {
         e.preventDefault();
         setErrorMessage('');
         try {
-            await postSecret(noteValues);
+            await postSecret({ loginValues, content: noteValues });
             setNoteValues(initialState);
             navigate('/secret/secrets');
         } catch (error) {

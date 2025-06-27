@@ -1,34 +1,33 @@
 import '../../App.css';
-import React, {useEffect, useState} from 'react';
-import {getSecretsforUser} from "../../comunication/FetchSecrets";
+import React, { useState } from 'react';
+import { getSecretsforUser } from "../../comunication/FetchSecrets";
 
 /**
  * Secrets
  * @author Peter Rutschmann
  */
-const Secrets = ({loginValues}) => {
+const Secrets = ({ loginValues }) => {
     const [secrets, setSecrets] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
+    const [password, setPassword] = useState('');
 
-    useEffect(() => {
-        const fetchSecrets = async () => {
-            setErrorMessage('');
-            if( ! loginValues.email){
-                console.error('Secrets: No valid email, please do login first:' + loginValues);
-                setErrorMessage("No valid email, please do login first.");
-            } else {
-                try {
-                    const data = await getSecretsforUser(loginValues);
-                    console.log(data);
-                    setSecrets(data);
-                } catch (error) {
-                    console.error('Failed to fetch to server:', error.message);
-                    setErrorMessage(error.message);
-                }
+    const handleFetchSecrets = async () => {
+        if (!password) {
+            setErrorMessage("Please enter your password to decrypt secrets.");
+            return;
+        }
+        setErrorMessage('');
+        try {
+            const data = await getSecretsforUser(password);
+            setSecrets(data);
+            if (data.some(s => s.content === 'DECRYPTION_FAILED')) {
+                setErrorMessage("One or more secrets could not be decrypted. Is the password correct?");
             }
-        };
-        fetchSecrets();
-    }, [loginValues]);
+        } catch (error) {
+            console.error('Failed to fetch secrets:', error.message);
+            setErrorMessage(error.message);
+        }
+    };
 
     return (
         <div style={{
@@ -57,7 +56,29 @@ const Secrets = ({loginValues}) => {
                     color: '#2d3748',
                     letterSpacing: '1px'
                 }}>My Secrets</h1>
-                {errorMessage && <p style={{color: 'red'}}>{errorMessage}</p>}
+
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%', maxWidth: '500px' }}>
+                    <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter password to decrypt"
+                        style={{
+                            padding: '.7rem',
+                            borderRadius: '.7rem',
+                            border: '1.5px solid #cbd5e1',
+                            fontSize: '1rem',
+                            outline: 'none',
+                            background: '#f7fafc',
+                            flex: 1
+                        }}
+                    />
+                    <button onClick={handleFetchSecrets} style={{ padding: '.7rem 1.5rem', background: '#5a67d8', color: 'white', border: 'none', borderRadius: '.7rem', cursor: 'pointer' }}>
+                        Show Secrets
+                    </button>
+                </div>
+
+                {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                 <div style={{ width: '100%' }}>
                     <h2 style={{ color: '#4a5568', marginBottom: '1rem', fontWeight: 600 }}>Secrets</h2>
                     <div style={{
@@ -90,8 +111,10 @@ const Secrets = ({loginValues}) => {
                                             <tr key={secret.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
                                                 <td style={{ padding: '.7rem', textAlign: 'center', color: '#2d3748' }}>{secret.id}</td>
                                                 <td style={{ padding: '.7rem', textAlign: 'center', color: '#2d3748' }}>{secret.userId}</td>
-                                                <td style={{ padding: '.7rem', color: '#2d3748', fontFamily: 'monospace', background: '#f7fafc', borderRadius: '.5rem' }}>
-                                                    <pre style={{ margin: 0, background: 'none', fontSize: '1rem' }}>{JSON.stringify(secret.content, null, 2)}</pre>
+                                                <td style={{ padding: '.7rem', color: secret.content === 'DECRYPTION_FAILED' ? 'red' : '#2d3748', fontFamily: 'monospace', background: '#f7fafc', borderRadius: '.5rem' }}>
+                                                    <pre style={{ margin: 0, background: 'none', fontSize: '1rem' }}>
+                                                        {secret.content !== 'DECRYPTION_FAILED' ? JSON.stringify(secret.content, null, 2) : 'DECRYPTION FAILED'}
+                                                    </pre>
                                                 </td>
                                             </tr>
                                         ))
