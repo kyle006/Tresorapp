@@ -44,10 +44,8 @@ public class UserController {
    public UserController(ConfigProperties configProperties, UserService userService,
                          PasswordEncryptionService passwordService, ReCaptchaService reCaptchaService) {
       this.configProperties = configProperties;
-      System.out.println("UserController.UserController: cross origin: " + configProperties.getOrigin());
-      // Logging in the constructor
-      logger.info("UserController initialized: " + configProperties.getOrigin());
-      logger.debug("UserController.UserController: Cross Origin Config: {}", configProperties.getOrigin());
+      logger.info("UserController initialized");
+      logger.debug("Cross Origin Config: {}", configProperties.getOrigin());
       this.userService = userService;
       this.passwordService = passwordService;
       this.reCaptchaService = reCaptchaService;
@@ -57,6 +55,7 @@ public class UserController {
    @CrossOrigin(origins = "${CROSS_ORIGIN}")
    @PostMapping
    public ResponseEntity<String> createUser(@Valid @RequestBody RegisterUser registerUser, BindingResult bindingResult) {
+      logger.debug("Attempting to create user: {}", registerUser);
       //captcha
       //todo ergänzen(Sollte komplett sein)
       /*
@@ -76,7 +75,7 @@ public class UserController {
          List<String> errors = bindingResult.getFieldErrors().stream()
                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                .collect(Collectors.toList());
-         System.out.println("UserController.createUser " + errors);
+         logger.warn("User creation validation failed for {}: {}", registerUser.getEmail(), errors);
 
          JsonArray arr = new JsonArray();
          errors.forEach(arr::add);
@@ -84,16 +83,15 @@ public class UserController {
          obj.add("message", arr);
          String json = new Gson().toJson(obj);
 
-         System.out.println("UserController.createUser, validation fails: " + json);
          return ResponseEntity.badRequest().body(json);
       }
-      System.out.println("UserController.createUser: input validation passed");
+      logger.debug("Input validation passed for user {}", registerUser.getEmail());
 
       //password validation
       //todo ergänzen(Sollte komplett sein)
       List<String> passwordErrors = userService.validatePassword(registerUser.getPassword());
       if (!passwordErrors.isEmpty()) {
-         System.out.println("UserController.createUser, password validation fails: " + passwordErrors);
+         logger.warn("Password validation failed for user {}: {}", registerUser.getEmail(), passwordErrors);
          JsonArray arr = new JsonArray();
          passwordErrors.forEach(arr::add);
          JsonObject obj = new JsonObject();
@@ -101,12 +99,11 @@ public class UserController {
          String json = new Gson().toJson(obj);
          return ResponseEntity.badRequest().body(json);
       }
-      //todo Muss noch gelöscht werden
-      System.out.println("UserController.createUser, password validation passed");
+      logger.debug("Password validation passed for user {}", registerUser.getEmail());
 
       // Check if user already exists
       if (userService.findByEmail(registerUser.getEmail()) != null) {
-         System.out.println("UserController.createUser, email already exists: " + registerUser.getEmail());
+         logger.warn("User creation failed. Email already exists: {}", registerUser.getEmail());
          JsonObject obj = new JsonObject();
          obj.addProperty("message", "A user with this email already exists.");
          String json = new Gson().toJson(obj);
@@ -117,7 +114,7 @@ public class UserController {
       String role = "USER";
       if (userService.countUsers() == 0) {
           role = "ADMIN";
-          System.out.println("UserController.createUser: No users found. Promoting " + registerUser.getEmail() + " to ADMIN.");
+         logger.info("No users found. Promoting {} to ADMIN.", registerUser.getEmail());
       }
 
       // Generate Salt
@@ -135,11 +132,10 @@ public class UserController {
       );
 
       User savedUser = userService.createUser(user);
-      System.out.println("UserController.createUser, user saved in db");
+      logger.info("User created successfully: {}", savedUser.getEmail());
       JsonObject obj = new JsonObject();
       obj.addProperty("answer", "User Saved");
       String json = new Gson().toJson(obj);
-      System.out.println("UserController.createUser " + json);
       return ResponseEntity.accepted().body(json);
    }
 
@@ -149,10 +145,12 @@ public class UserController {
    @GetMapping("{id}")
    @PreAuthorize("hasRole('ADMIN') or @userSecurity.hasUserId(authentication, #userId)")
    public ResponseEntity<User> getUserById(@PathVariable("id") Long userId) {
+      logger.debug("Request to get user by id: {}", userId);
       User user = userService.getUserById(userId);
       if (user != null) {
          return new ResponseEntity<>(user, HttpStatus.OK);
       } else {
+         logger.debug("User not found with id: {}", userId);
          return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       }
    }
@@ -163,6 +161,7 @@ public class UserController {
    @GetMapping
    @PreAuthorize("hasRole('ADMIN')")
    public ResponseEntity<List<User>> getAllUsers() {
+      logger.debug("Request to get all users");
       List<User> users = userService.getAllUsers();
       return new ResponseEntity<>(users, HttpStatus.OK);
    }
@@ -174,10 +173,13 @@ public class UserController {
    @PreAuthorize("hasRole('ADMIN') or @userSecurity.hasUserId(authentication, #userId)")
    public ResponseEntity<User> updateUser(@PathVariable("id") Long userId,
                                           @RequestBody User user) {
+      logger.debug("Request to update user with id: {}", userId);
       User updatedUser = userService.updateUser(user);
       if (updatedUser != null) {
+         logger.info("User with id {} updated successfully.", userId);
          return new ResponseEntity<>(updatedUser, HttpStatus.OK);
       } else {
+         logger.warn("Failed to update. User not found with id: {}", userId);
          return new ResponseEntity<>(HttpStatus.NOT_FOUND);
       }
    }
@@ -187,7 +189,9 @@ public class UserController {
    @DeleteMapping("{id}")
    @PreAuthorize("hasRole('ADMIN')")
    public ResponseEntity<String> deleteUser(@PathVariable("id") Long userId) {
+      logger.debug("Request to delete user with id: {}", userId);
       userService.deleteUser(userId);
+      logger.info("User with id {} deleted successfully.", userId);
       return new ResponseEntity<>("User successfully deleted!", HttpStatus.OK);
    }
 
@@ -196,13 +200,13 @@ public class UserController {
    @CrossOrigin(origins = "${CROSS_ORIGIN}")
    @PostMapping("/byemail")
    public ResponseEntity<String> getUserIdByEmail(@RequestBody EmailAdress email, BindingResult bindingResult) {
-      System.out.println("UserController.getUserIdByEmail: " + email);
+      logger.debug("Request to get user id by email: {}", email.getEmail());
       //input validation
       if (bindingResult.hasErrors()) {
          List<String> errors = bindingResult.getFieldErrors().stream()
                  .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                  .collect(Collectors.toList());
-         System.out.println("UserController.createUser " + errors);
+         logger.warn("Validation failed for getUserIdByEmail: {}", errors);
 
          JsonArray arr = new JsonArray();
          errors.forEach(arr::add);
@@ -210,27 +214,24 @@ public class UserController {
          obj.add("message", arr);
          String json = new Gson().toJson(obj);
 
-         System.out.println("UserController.createUser, validation fails: " + json);
          return ResponseEntity.badRequest().body(json);
       }
 
-      System.out.println("UserController.getUserIdByEmail: input validation passed");
+      logger.debug("Input validation passed for email {}", email.getEmail());
 
       User user = userService.findByEmail(email.getEmail());
       if (user == null) {
-         System.out.println("UserController.getUserIdByEmail, no user found with email: " + email);
+         logger.debug("No user found with email: {}", email.getEmail());
          JsonObject obj = new JsonObject();
          obj.addProperty("message", "No user found with this email");
          String json = new Gson().toJson(obj);
 
-         System.out.println("UserController.getUserIdByEmail, fails: " + json);
          return ResponseEntity.badRequest().body(json);
       }
-      System.out.println("UserController.getUserIdByEmail, user find by email");
+      logger.debug("User found for email {}", email.getEmail());
       JsonObject obj = new JsonObject();
       obj.addProperty("answer", user.getId());
       String json = new Gson().toJson(obj);
-      System.out.println("UserController.getUserIdByEmail " + json);
       return ResponseEntity.accepted().body(json);
    }
 

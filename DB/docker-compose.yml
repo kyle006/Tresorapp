@@ -11,7 +11,9 @@ services:
         MYSQL_ROOT_PASSWORD: 1234
         MYSQL_DATABASE: default_schema
       volumes:
-        - ./initcar.sql:/docker-entrypoint-initdb.d/1.sql       
+        - type: bind
+          source: ../tresorbackend_rupe-master/tresordb.sql
+          target: /docker-entrypoint-initdb.d/1.sql
       ports:
        - '3307:3306'
        

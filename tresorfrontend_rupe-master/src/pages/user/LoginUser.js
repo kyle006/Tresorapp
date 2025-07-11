@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../../comunication/FetchUser";
+import log from "../../comunication/LoggerService";
 
 /**
  * LoginUser
@@ -13,6 +14,7 @@ const LoginUser = ({ handleLogin }) => {
     const location = useLocation();
 
     useEffect(() => {
+        log.info("Login page loaded");
         if (location.state && location.state.message) {
             setMessage(location.state.message);
         }
@@ -26,18 +28,22 @@ const LoginUser = ({ handleLogin }) => {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        log.debug("Login form submitted for user:", inputs.email);
         loginUser(inputs)
             .then(data => {
                 if (data.token) {
                     setMessage(`Login successfully`);
+                    log.info("User logged in successfully:", inputs.email);
                     handleLogin(inputs.email, data.token, inputs.password);
                     navigate("/");
                 }
                 else {
+                    log.warn("Login failed for user:", inputs.email, "Reason:", (data.message || "Unknown error"));
                     setMessage("Login failed: " + (data.message || "Unknown error"));
                 }
             })
             .catch(err => {
+                log.error("An error occurred during login for user:", inputs.email, "Error:", err);
                 setMessage("Login failed: " + err.message);
             });
     }

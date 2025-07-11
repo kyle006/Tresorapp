@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * NewSecret
@@ -16,10 +17,12 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class NewSecret {
    @NotNull (message="secret is required.")
    private JsonNode content;
 
    @NotEmpty (message="encryption password is required.")
+   @ToString.Exclude
    private String encryptPassword;
 }

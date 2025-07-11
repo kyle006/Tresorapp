@@ -6,6 +6,7 @@ import ch.bbw.pr.tresorbackend.model.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,21 +30,25 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-        // Aufgabe: Authentifizierung mit Email & Passwort.
-        logger.info("Login-Request erhalten für Email: {}", request.getEmail());
-        // 1. Authentifizierung mit Spring Security durchführen.
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-        // 2. Bei Erfolg: User-Details laden.
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        logger.info("UserDetails geladen für Email: {}", request.getEmail());
-        // 3. JWT für den User generieren und zurücksenden.
-        final String jwt = jwtService.generateToken(userDetails);
-        logger.info("JWT generiert für Email: {}", request.getEmail());
-        return ResponseEntity.ok(new AuthResponse(jwt));
+        try {
+            logger.debug("Login attempt for user '{}'", request.getEmail());
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+            final String jwt = jwtService.generateToken(userDetails);
+            logger.info("User '{}' successfully authenticated.", request.getEmail());
+            return ResponseEntity.ok(new AuthResponse(jwt));
+        } catch (BadCredentialsException e) {
+            logger.warn("Authentication failed for user '{}'. Invalid credentials.", request.getEmail());
+            return ResponseEntity.status(401).build();
+        } catch (Exception e) {
+            logger.error("An unexpected error occurred during login for user '{}'", request.getEmail(), e);
+            return ResponseEntity.status(500).build();
+        }
     }
 }

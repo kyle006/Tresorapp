@@ -25,9 +25,11 @@ public class RegisterUser {
    private String email;
 
    @NotEmpty (message="Password is required.")
+   @ToString.Exclude
    private String password;
 
    @NotEmpty (message="Password-confirmation is required.")
+   @ToString.Exclude
    private String passwordConfirmation;
 
    @JsonProperty("captchaToken")
