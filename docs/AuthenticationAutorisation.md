@@ -1,50 +1,60 @@
-# Authentication and Authorization Implementation
+# Authentifizierung und Autorisierung Implementierung
 
-This document outlines the implementation of authentication and authorization in the Tresor-Application.
+Diese Dokumentation erklärt, wie die Anmeldung und Berechtigung in der Tresor-Anwendung funktioniert.
 
-## Authentication Flow
+## Anmeldeprozess
 
-The application uses a token-based authentication system with JSON Web Tokens (JWT).
+Die Anwendung verwendet ein Token-basiertes Anmeldesystem mit JSON Web Tokens (JWT).
 
-1.  **Login with Credentials**:
-    - A user submits their `email` and `password` via a `POST` request to the `/api/auth/login` endpoint.
-    - The `AuthController` receives the request.
-    - It uses Spring Security's `AuthenticationManager` to validate the credentials against the user data stored in the database. The password check is performed using the `BCryptPasswordEncoder`.
+1. **Anmeldung mit Benutzerdaten**:
+   - Der Benutzer gibt seine `E-Mail` und sein `Passwort` ein
+   - Diese werden an den Server gesendet (`POST` Request an `/api/auth/login`)
+   - Der `AuthController` prüft die Daten
+   - Das Passwort wird mit `BCryptPasswordEncoder` überprüft
 
-2.  **JWT Generation**:
-    - Upon successful authentication, the `JwtService` generates a JWT.
-    - This token contains the user's email as the subject, the user's roles as a custom claim, and an expiration date.
-    - The expiration time is configured in the `application.properties` file (`jwt.expiration.ms`).
+2. **JWT Token erstellen**:
+   - Bei erfolgreicher Anmeldung erstellt der `JwtService` einen JWT Token
+   - Der Token enthält:
+     - E-Mail des Benutzers
+     - Rolle des Benutzers (ADMIN oder USER)
+     - Ablaufzeit (konfiguriert in `application.properties`)
 
-3.  **Token-based Subsequent Requests**:
-    - The generated JWT is returned to the frontend.
-    - The frontend stores this token (e.g., in `localStorage`) and includes it in the `Authorization` header for all subsequent requests to protected endpoints (e.g., `Authorization: Bearer <jwt>`).
+3. **Token für weitere Anfragen**:
+   - Der Token wird an das Frontend zurückgeschickt
+   - Das Frontend speichert den Token (z.B. im `localStorage`)
+   - Bei jeder weiteren Anfrage wird der Token im Header mitgeschickt: `Authorization: Bearer <token>`
 
-## JWT Validation
+## Token Überprüfung
 
-- The `JwtAuthenticationFilter` is a custom filter that runs for every incoming request.
-- It checks for the presence of a `Bearer` token in the `Authorization` header.
-- If a token is found, `JwtService` is used to:
-    1.  Parse the token and extract the user's email.
-    2.  Validate the token's signature using the secret key (`jwt.secret`).
-    3.  Check if the token has expired.
-- If the token is valid, the filter sets the user's identity in the Spring Security `SecurityContext`, authenticating them for the duration of the request.
+- Der `JwtAuthenticationFilter` prüft jeden Request
+- Er schaut, ob ein `Bearer` Token im `Authorization` Header vorhanden ist
+- Wenn ja, wird der Token überprüft:
+  1. E-Mail aus dem Token extrahieren
+  2. Token-Signatur mit dem geheimen Schlüssel prüfen
+  3. Prüfen, ob der Token noch gültig ist (nicht abgelaufen)
+- Ist der Token gültig, wird der Benutzer für diesen Request angemeldet
 
-## Role-based Authorization
+## Rollen-basierte Berechtigung
 
-Authorization is handled using roles, restricting access to certain endpoints based on the authenticated user's role.
+Die Berechtigung funktioniert über Rollen, die bestimmen, wer auf welche Bereiche zugreifen darf.
 
-1.  **Role Definition**:
-    - The `User` entity in the database has a `role` field (e.g., "ADMIN", "USER").
-    - The first user to register is automatically assigned the `ADMIN` role. All subsequent users are assigned the `USER` role.
+1. **Rollen Definition**:
+   - Jeder Benutzer hat eine Rolle in der Datenbank: "ADMIN" oder "USER"
+   - Der erste registrierte Benutzer wird automatisch zum `ADMIN`
+   - Alle weiteren Benutzer werden zu `USER`
 
-2.  **Authorities in Security Context**:
-    - When a user is loaded via `UserServiceImpl` (which implements `UserDetailsService`), their role string is converted into a `GrantedAuthority` object (e.g., "ADMIN" becomes `ROLE_ADMIN`). This is the standard format required by Spring Security.
+2. **Rollen im System**:
+   - Der `UserServiceImpl` wandelt die Rolle in ein `GrantedAuthority` Objekt um
+   - "ADMIN" wird zu `ROLE_ADMIN`, "USER" wird zu `ROLE_USER`
 
-3.  **Enforcing Authorization**:
-    - Endpoint access is configured in `SecurityConfig.java` using `authorizeHttpRequests`.
-    - **Examples**:
-        - `POST /api/users` (Registration): Open to everyone (`permitAll`).
-        - `/api/users/**` (Get all users): Requires `ROLE_ADMIN`.
-        - `/api/secrets/**`: Requires either `ROLE_USER` or `ROLE_ADMIN`.
-    - This ensures that only authenticated users with the correct roles can access protected resources. 
+3. **Zugriffskontrolle**:
+   - In der `SecurityConfig.java` wird festgelegt, wer auf welche Bereiche zugreifen darf:
+     - `POST /api/users` (Registrierung): Für alle zugänglich
+     - `/api/users/**` (Alle Benutzer anzeigen): Nur für `ROLE_ADMIN`
+     - `/api/secrets/**` (Geheimnisse verwalten): Für `ROLE_USER` und `ROLE_ADMIN`
+
+## Einfach erklärt
+
+1. **Anmelden**: Benutzer gibt E-Mail und Passwort ein → bekommt Token zurück
+2. **Token verwenden**: Bei jeder Anfrage Token mitschicken → Server erkennt, wer du bist
+3. **Berechtigung**: Je nach Rolle (ADMIN/USER) darfst du verschiedene Sachen machen

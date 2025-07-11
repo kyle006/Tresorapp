@@ -45,15 +45,11 @@ public class SecurityConfig {
         http
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                // Aufgabe: Rollenbasierte Autorisierung - Definiert Zugriffsregeln für Endpunkte.
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Auth-Endpunkte (Login) und Registrierung sind für alle offen.
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                        // Aufgabe: Mindestens zwei Rollen - Nur Admins können alle User sehen.
                         .requestMatchers("/api/users/**").hasAuthority("ROLE_ADMIN")
-                        // Admins und User können auf Secrets zugreifen.
                         .requestMatchers("/api/secrets/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
