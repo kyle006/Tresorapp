@@ -1,3 +1,5 @@
+import log from "./LoggerService";
+
 /**
  * Fetch methodes for user api calls
  * @author Peter Rutschmann
@@ -35,10 +37,10 @@ export const loginUser = async (credentials) => {
         if (data.token) {
             localStorage.setItem('token', data.token);
         }
-        console.log('Login successful:', data);
+        log.info('Login successful for user:', credentials.email);
         return data;
     } catch (error) {
-        console.error('Failed to login:', error.message);
+        log.error('Failed to login:', error.message);
         throw new Error('Failed to login. ' + error.message);
     }
 };
@@ -71,7 +73,7 @@ export const getUsers = async () => {
 
         return await response.json();
     } catch (error) {
-        console.error("Error in getUsers:", error);
+        log.error("Error in getUsers:", error);
         throw error;
     }
 };
@@ -99,10 +101,10 @@ export const getUser = async (id) => {
         }
 
         const data = await response.json();
-        console.log('User successfully got:', data);
+        log.debug('User successfully got:', data);
         return data;
     } catch (error) {
-        console.error('Failed to get user:', error.message);
+        log.error('Failed to get user:', error.message);
         throw new Error('Failed to get user. ' + error.message);
     }
 };
@@ -144,7 +146,7 @@ export async function postUser(credentials) {
 
         return await response.json();
     } catch (error) {
-        console.error("Error in postUser:", error);
+        log.error("Error in postUser:", error);
         throw error;
     }
 }
